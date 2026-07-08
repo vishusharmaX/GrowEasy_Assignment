@@ -12,7 +12,12 @@ const corsOptions = {
   origin: (origin, callback) => {
     // Allow requests with no origin (like mobile apps, curl, postman)
     if (!origin) return callback(null, true);
-    
+
+    // Always allow localhost for seamless developer testing
+    if (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
+      return callback(null, true);
+    }
+
     const allowedOrigin = env.CORS_ORIGIN;
     
     // Support wildcard or exact match
@@ -26,7 +31,8 @@ const corsOptions = {
       return callback(null, true);
     }
     
-    return callback(new Error(`Not allowed by CORS policy for origin: ${origin}`), false);
+    // Disallow without throwing a 500 internal server error
+    return callback(null, false);
   },
   credentials: true,
 };
